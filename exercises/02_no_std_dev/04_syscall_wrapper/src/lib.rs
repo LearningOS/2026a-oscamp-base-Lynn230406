@@ -55,21 +55,59 @@ pub struct SyscallABI {
 pub fn x86_64_abi() -> SyscallABI {
     // TODO: Fill in the x86_64 syscall ABI
     // Hint: x86_64 uses the "syscall" instruction, syscall number in rax
-    todo!()
+    SyscallABI {
+        arch: "x86_64",
+        instruction: "syscall",
+        id_reg: "rax",
+        ret_reg: "rax",
+        arg_regs: &["rdi", "rsi", "rdx", "r10", "r8", "r9"],
+        clobbered: &["rcx", "r11"],
+        sys_write: 1,
+        sys_read: 0,
+        sys_close: 3,
+        sys_exit: 60,
+    }
 }
 
 /// Return the aarch64 Linux syscall ABI description
 pub fn aarch64_abi() -> SyscallABI {
     // TODO: Fill in the aarch64 syscall ABI
     // Hint: aarch64 uses the "svc #0" instruction, syscall number in x8
-    todo!()
+    SyscallABI {
+        arch: "aarch64",
+        instruction: "svc #0",
+        id_reg: "x8",
+        ret_reg: "x0",
+        // 为什么这么写：ARM64 的参数寄存器就是顺延的 x0 到 x5
+        arg_regs: &["x0", "x1", "x2", "x3", "x4", "x5"],
+        // 为什么这么写：ARM 架构的 svc 指令很干净，不会破坏额外的寄存器
+        clobbered: &[],
+        // 为什么这么写：ARM 用的是通用系统调用表，编号和 x86 不同
+        sys_write: 64,
+        sys_read: 63,
+        sys_close: 57,
+        sys_exit: 93,
+    }
 }
 
 /// Return the riscv64 Linux syscall ABI description
 pub fn riscv64_abi() -> SyscallABI {
     // TODO: Fill in the riscv64 syscall ABI
     // Hint: riscv64 uses the "ecall" instruction, syscall number in a7
-    todo!()
+    SyscallABI {
+        arch: "riscv64",
+        instruction: "ecall",
+        id_reg: "a7",
+        ret_reg: "a0",
+        // 为什么这么写：RISC-V 规定用 a0 到 a5 传参
+        arg_regs: &["a0", "a1", "a2", "a3", "a4", "a5"],
+        clobbered: &[],
+        // 为什么这么写：RISC-V 和 ARM 一样，用的是 asm-generic 系统调用表，所以编号一样
+        sys_write: 64,
+        sys_read: 63,
+        sys_close: 57,
+        sys_exit: 93,
+    }
 }
 
 // ============================================================
@@ -88,7 +126,21 @@ pub unsafe fn syscall3(id: usize, arg0: usize, arg1: usize, arg2: usize) -> isiz
     //   - inlateout("rax") id => ret
     //   - in("rdi") arg0, in("rsi") arg1, in("rdx") arg2
     //   - out("rcx") _, out("r11") _
-    todo!()
+    let ret: isize;
+    core::arch::asm!(
+        "syscall",
+        // 为什么这么写：在 x86 里，系统调用号必须放 rax。inlateout 表示这个寄存器既输入又输出结果
+        inlateout("rax") id as isize => ret,
+        // 为什么这么写：把 Rust 变量塞进指定的 CPU 寄存器里
+        in("rdi") arg0,
+        in("rsi") arg1,
+        in("rdx") arg2,
+        // 为什么这么写：告诉编译器这俩寄存器被硬件改写了，别用它们存别的东西
+        out("rcx") _,
+        out("r11") _,
+        options(nostack)
+    );
+    ret
 }
 
 #[cfg(all(target_arch = "aarch64", target_os = "linux"))]
@@ -99,7 +151,17 @@ pub unsafe fn syscall3(id: usize, arg0: usize, arg1: usize, arg2: usize) -> isiz
     //   - in("x8") id
     //   - inlateout("x0") arg0 => ret
     //   - in("x1") arg1, in("x2") arg2
-    todo!()
+    let ret: isize;
+    core::arch::asm!(
+        "svc #0",
+        // 为什么这么写：ARM64 规定 x8 放调用号，x0 放第一个参数，返回值也放 x0 里
+        in("x8") id,
+        inlateout("x0") arg0 => ret,
+        in("x1") arg1,
+        in("x2") arg2,
+        options(nostack)
+    );
+    ret
 }
 
 // Non-Linux platforms: provide a stub so the code compiles
@@ -140,25 +202,30 @@ const NATIVE_SYS_EXIT: usize = 0;
 /// Write data from `buf` to file descriptor `fd`.
 pub fn sys_write(fd: usize, buf: &[u8]) -> isize {
     // TODO: Call syscall3 to implement write
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_WRITE, fd, buf.as_ptr() as usize, buf.len()) }
 }
 
 /// Read data from file descriptor `fd` into `buf`.
 pub fn sys_read(fd: usize, buf: &mut [u8]) -> isize {
     // TODO: Call syscall3 to implement read
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_READ, fd, buf.as_mut_ptr() as usize, buf.len()) }
 }
 
 /// Close file descriptor `fd`.
 pub fn sys_close(fd: usize) -> isize {
     // TODO: Call syscall3 to implement close
-    todo!()
+    unsafe { syscall3(NATIVE_SYS_CLOSE, fd, 0, 0) }
 }
 
 /// Terminate the current process.
 pub fn sys_exit(code: i32) -> ! {
     // TODO: Call syscall3 to implement exit
-    todo!()
+    unsafe {
+        // 为什么这么写：调用 exit 后，操作系统本应直接结束进程。如果它没结束（比如出bug了），程序继续往下跑。
+        // 所以必须加一个 loop {} 死循环，防止程序继续往下执行未定义的行为。返回类型是 `!` 表示永远不返回。
+        syscall3(NATIVE_SYS_EXIT, code as usize, 0, 0);
+    }
+    loop {}
 }
 
 // ============================================================

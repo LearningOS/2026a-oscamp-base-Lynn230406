@@ -119,7 +119,56 @@ unsafe impl GlobalAlloc for FreeListAllocator {
         // TODO: Step 2 — no suitable block in free_list, allocate from bump region
         //
         // Same logic as 02_bump_allocator's alloc
-        todo!()
+        let mut prev: *mut FreeBlock = null_mut();
+        let mut curr = self.free_list_head();
+
+        while !curr.is_null() {
+            let curr_addr = curr as usize;
+            let curr_size = (*curr).size;
+
+            // 检查两个条件：1. 地址是否对齐； 2. 剩余大小是否足够
+            if curr_addr % align == 0 && curr_size >= size {
+                // 找到了！把它从链表中摘除
+                if prev.is_null() {
+                    // 如果是头节点，把头指针指向下一个
+                    self.set_free_list_head((*curr).next);
+                } else {
+                    // 如果是中间节点，把前一个节点的 next 指向当前节点的下一个
+                    (*prev).next = (*curr).next;
+                }
+                // 直接返回这块内存
+                return curr as *mut u8;
+            }
+            // 继续找下一个
+            prev = curr;
+            curr = (*curr).next;
+        }
+
+        // ==========================================
+        // Step 2: 没找到合适的，从 bump 区域分配新内存
+        // ==========================================
+        let mut current = self.bump_next.load(core::sync::atomic::Ordering::SeqCst);
+        
+        loop {
+            // 内存对齐计算
+            let aligned = (current + align - 1) & !(align - 1);
+            let end = aligned + size;
+
+            if end > self.heap_end {
+                return null_mut(); // 内存耗尽
+            }
+
+            // 使用 CAS 原子更新 bump_next
+            match self.bump_next.compare_exchange(
+                current, 
+                end, 
+                core::sync::atomic::Ordering::SeqCst, 
+                core::sync::atomic::Ordering::SeqCst
+            ) {
+                Ok(_) => return aligned as *mut u8, // 抢到了，返回
+                Err(actual) => current = actual,    // 被别人抢了，重试
+            }
+        }
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
@@ -131,7 +180,20 @@ unsafe impl GlobalAlloc for FreeListAllocator {
         // 1. Cast ptr to *mut FreeBlock
         // 2. Write FreeBlock { size, next: current list head }
         // 3. Update free_list head to ptr
-        todo!()
+        let size = layout.size().max(core::mem::size_of::<FreeBlock>());
+
+        // ==========================================
+        // Step 3: 把释放的内存块插到 free_list 的头部
+        // ==========================================
+        // 1. 把这块内存强制转换成 FreeBlock 指针
+        let block = ptr as *mut FreeBlock;
+        
+        // 2. 在这块内存上写入头部信息
+        (*block).size = size;
+        (*block).next = self.free_list_head(); // 它的下一个指向当前的链表头
+        
+        // 3. 更新 free_list 的头部指针，指向这个刚放出来的块
+        self.set_free_list_head(block);
     }
 }
 
