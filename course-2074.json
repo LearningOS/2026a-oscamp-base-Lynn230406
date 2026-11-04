@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Lynn230406",
-  "commit": "8a68db462d35ce30574b54adb23037554bf02d60",
-  "score": 3,
+  "commit": "e64a97146dab79c8fd954c22e6d3579f30d4c415",
+  "score": 15,
   "totalScore": 100,
   "exercises": [
     {
@@ -16,23 +16,23 @@
     {
       "name": "mutex_counter",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "channel",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "process_pipe",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "mem_primitives",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Lynn230406",
-  "runId": "41773564855",
+  "runId": "41829434344",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
