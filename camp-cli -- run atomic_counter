@@ -1,0 +1,62 @@
+[1mdiff --git a/exercises/03_os_concurrency/01_atomic_counter/src/lib.rs b/exercises/03_os_concurrency/01_atomic_counter/src/lib.rs[m
+[1mindex 5e91042..5150e3a 100644[m
+[1m--- a/exercises/03_os_concurrency/01_atomic_counter/src/lib.rs[m
+[1m+++ b/exercises/03_os_concurrency/01_atomic_counter/src/lib.rs[m
+[36m@@ -26,19 +26,19 @@[m [mimpl AtomicCounter {[m
+     /// Hint: use `fetch_add` with `Ordering::Relaxed`[m
+     pub fn increment(&self) -> u64 {[m
+         // TODO[m
+[31m-        todo!()[m
+[32m+[m[32m        self.value.fetch_add(1, Ordering::Relaxed)[m
+     }[m
+ [m
+     /// Atomically decrements by 1, returns the value **before** decrement.[m
+     pub fn decrement(&self) -> u64 {[m
+         // TODO[m
+[31m-        todo!()[m
+[32m+[m[32m        self.value.fetch_sub(1, Ordering::Relaxed)[m
+     }[m
+ [m
+     /// Gets the current value.[m
+     pub fn get(&self) -> u64 {[m
+         // TODO[m
+[31m-        todo!()[m
+[32m+[m[32m        self.value.load(Ordering::Relaxed)[m
+     }[m
+ [m
+     /// Atomic CAS (Compare-And-Swap) operation.[m
+[36m@@ -48,7 +48,12 @@[m [mimpl AtomicCounter {[m
+     /// Hint: use `compare_exchange` with success ordering `Ordering::AcqRel` and failure ordering `Ordering::Acquire`[m
+     pub fn compare_and_swap(&self, expected: u64, new_val: u64) -> Result<u64, u64> {[m
+         // TODO[m
+[31m-        todo!()[m
+[32m+[m[32m        self.value.compare_exchange([m
+[32m+[m[32m            expected,[m[41m [m
+[32m+[m[32m            new_val,[m[41m [m
+[32m+[m[32m            Ordering::AcqRel,[m[41m [m
+[32m+[m[32m            Ordering::Acquire[m
+[32m+[m[32m        )[m
+     }[m
+ [m
+     /// Multiply the value atomically using a CAS loop.[m
+[36m@@ -62,7 +67,19 @@[m [mimpl AtomicCounter {[m
+         //     let new = current * multiplier;[m
+         //     match self.compare_and_swap(current, new) { ... }[m
+         // }[m
+[31m-        todo!()[m
+[32m+[m[32m        let mut current = self.value.load(Ordering::Relaxed);[m
+[32m+[m[32m        loop {[m
+[32m+[m[32m            let new_val = current * multiplier;[m
+[32m+[m[32m            // 尝试去修改：如果当前内存里的值还是我刚才读到的 `current`，就把它改成 `new_val`。[m
+[32m+[m[32m            match self.compare_and_swap(current, new_val) {[m
+[32m+[m[32m                Ok(old) => return old, // 修改成功，返回旧值[m
+[32m+[m[32m                Err(actual) => {[m
+[32m+[m[32m                    // 修改失败，说明在这个间隙，别的线程把值改了。[m
+[32m+[m[32m                    // 我们就拿最新的实际值（actual），重新计算，再试一次。[m
+[32m+[m[32m                    current = actual;[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+     }[m
+ }[m
+ [m
