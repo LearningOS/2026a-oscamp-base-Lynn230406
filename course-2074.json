@@ -2,7 +2,7 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Lynn230406",
-  "commit": "5c59647751482418f1b1c1d4d6beb982f4590ecd",
+  "commit": "d9f8635fe531e4e73916388012ceb447d05c9808",
   "score": 47,
   "totalScore": 100,
   "exercises": [
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Lynn230406",
-  "runId": "45216887106",
+  "runId": "45217977990",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
