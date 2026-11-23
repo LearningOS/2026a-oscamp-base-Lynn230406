@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Lynn230406",
-  "commit": "e2e8fa5e32a55683103adbf61591f5f65f26d523",
-  "score": 39,
+  "commit": "2d4bafaaa1288fbd4f37501cca678d4a38b58556",
+  "score": 43,
   "totalScore": 100,
   "exercises": [
     {
@@ -72,9 +72,9 @@
     {
       "name": "atomic_counter",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "atomic_ordering",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Lynn230406",
-  "runId": "41832551811",
+  "runId": "45214701663",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
