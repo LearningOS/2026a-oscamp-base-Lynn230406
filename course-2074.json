@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Lynn230406",
-  "commit": "37e0de2b18bdc03b0dedf98435b2f23e5573d296",
-  "score": 51,
+  "commit": "130c71611b6948a65f99debf36fa3bec48526942",
+  "score": 60,
   "totalScore": 100,
   "exercises": [
     {
@@ -93,16 +93,16 @@
     {
       "name": "spinlock_guard",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "rwlock",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "stack_coroutine",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Lynn230406",
-  "runId": "45306740072",
+  "runId": "45309388852",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
