@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Lynn230406",
-  "commit": "d9f8635fe531e4e73916388012ceb447d05c9808",
-  "score": 47,
+  "commit": "37e0de2b18bdc03b0dedf98435b2f23e5573d296",
+  "score": 51,
   "totalScore": 100,
   "exercises": [
     {
@@ -86,9 +86,9 @@
     {
       "name": "spinlock",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "spinlock_guard",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Lynn230406",
-  "runId": "45217977990",
+  "runId": "45306740072",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
